@@ -1,52 +1,52 @@
 -- Core.lua
--- NoSpider: 거미 공포증 모드 애드온 핵심 로직
--- 네임플레이트 기반 3D 모델 가림 + 자동 감지
+-- NoSpider: Core Logic for Arachnophobia Mode Add-on
+-- Nameplate-based 3D model occlusion + automatic detection
 
 local ADDON_NAME, NS = ...
 
 -- ============================================
--- 기본 설정
+-- Basic Settings
 -- ============================================
 local defaults = {
     enabled = true,
-    overlayAlpha = 0.95,          -- 오버레이 불투명도
-    namePatternMatch = true,      -- 이름 기반 패턴 매칭
-    warningSound = true,          -- 경고음
-    warningMessage = true,        -- 경고 메시지
-    overlayColor = { 0.35, 0.55, 0.35 },  -- 오버레이 색상 (녹색 계열)
-    overlayWidth = 180,           -- 오버레이 가로 크기
-    overlayHeight = 260,          -- 오버레이 세로 크기 (모델 전체 커버용)
-    coverPortrait = true,         -- 타겟/포커스 초상화도 가리기
-    autoEnableNameplates = true,  -- 적 네임플레이트 자동 활성화
-    zoneWarning = true,           -- 지역(Zone) 경고 배너
-    spawnProximityWarning = true,  -- 스폰 좌표 접근 경고
-    spawnProximityMeters = 100,     -- 접근 경고 반경 (미터)
-    combatLogDetection = true,    -- 전투 로그 보조 감지
-    deadSpiderWarning = true,     -- 죽은 거미 마우스오버 경고
-    zoneWarningSound = false,     -- 지역 경고 소리
-    warningCooldown = 2,          -- 글로벌 경고 쿨다운 (초)
-    warnedNpcCooldown = 60,       -- 동일 종류 거미 재경고 쿨다운 (초)
-    scanInterval = 1.5,           -- 네임플레이트 리스캔 주기 (초)
-    showMapPins = true,           -- 월드맵 거미 출몰 지역 표시
-    showNPCList = true,           -- 월드맵 거미 NPC 목록 표시
-    dungeonPinSize = 16,          -- 던전 핀 아이콘 크기
-    dungeonPinOffset = 2.0,       -- 던전 핀 오프셋 (%)
-    heatmapGranularity = 3,       -- 히트맵 해상도 (1=낮음 25, 2=보통 50, 3=높음 75, 4=매우높음 100)
-    heatColorLo = { 1, 0.6, 0 },  -- 히트맵 저밀도 색상 (주황)
-    heatColorHi = { 1, 0.1, 0 },  -- 히트맵 고밀도 색상 (빨강)
-    zoneWarningWidth = 260,       -- 경고 배너 가로 크기
-    zoneWarningHeight = 24,       -- 경고 배너 세로 크기
-    zoneWarningFontSize = 11,     -- 경고 배너 글꼴 크기
-    warnZoneBgColor = { 0.5, 0.4, 0.1, 0.50 },        -- 지역 경고 배너 배경색
-    warnProximityBgColor = { 0.4, 0.1, 0.1, 0.65 },    -- 접근 경고 배너 배경색
-    zoneWarningPos = nil,         -- 경고 배너 위치 (nil=기본, {point,x,y})
-    npcListPos = nil,             -- NPC 목록 위치 (nil=기본, {point,x,y})
+    overlayAlpha = 0.95,          -- Overlay Opacity
+    namePatternMatch = true,      -- Name-based pattern matching
+    warningSound = true,          -- beep
+    warningMessage = true,        -- warning message
+    overlayColor = { 0.35, 0.55, 0.35 },  -- Overlay color (green color)
+    overlayWidth = 180,           -- Overlay horizontal size
+   overlayHeight = 260, -- Overlay vertical size (to cover entire model) 
+    coverPortrait = true, -- also cover target/focus portrait 
+    autoEnableNameplates = true, -- Automatically enable enemy nameplates 
+    zoneWarning = true, -- Zone warning banner 
+    spawnProximityWarning = true, -- Spawn coordinate approach warning 
+    spawnProximityMeters = 100, -- Proximity warning radius (meters)
+    combatLogDetection = true,    -- Battle log secondary detection
+    deadSpiderWarning = true,     -- Dead spider hover warning
+    zoneWarningSound = false,     -- local warning sound
+    warningCooldown = 2,          -- Global Warning Cooldown (seconds)
+    warnedNpcCooldown = 60,       -- Same Type Spider Re-Warning Cooldown (Seconds)
+    scanInterval = 1.5,           -- Nameplate rescan cycle (seconds)
+    showMapPins = true,           -- World map shows spider infestation areas
+    showNPCList = true,           -- World map spider NPC list display
+    dungeonPinSize = 16,          -- Dungeon Pin Icon Size
+    dungeonPinOffset = 2.0,       -- Dungeon Pin Offset (%)
+    heatmapGranularity = 3,       -- Heatmap resolution (1=low 25, 2=normal 50, 3=high 75, 4=very high 100)
+    heatColorLo = { 1, 0.6, 0 },  -- Heatmap low-density color (orange)
+    heatColorHi = { 1, 0.1, 0 },  -- Heatmap High Density Color (Red)
+    zoneWarningWidth = 260,       -- Warning banner horizontal size
+    zoneWarningHeight = 24,       -- Warning banner vertical size
+    zoneWarningFontSize = 11,     -- Warning banner font size
+    warnZoneBgColor = { 0.5, 0.4, 0.1, 0.50 },        -- Local warning banner background color
+    warnProximityBgColor = { 0.4, 0.1, 0.1, 0.65 },    -- Approach warning banner background color
+    zoneWarningPos = nil,         -- Alert banner position (nil=default, {point,x,y})
+    npcListPos = nil,             -- NPC list location (nil=default, {point,x,y})
     customIDs = {},
     customZones = {},    -- [uiMapID] = true
 }
 
 -- ============================================
--- 로컬 참조 (퍼포먼스)
+-- Local Reference (Performance)
 -- ============================================
 local UnitGUID = UnitGUID
 local UnitName = UnitName
@@ -63,13 +63,13 @@ local UnitCanAttack = UnitCanAttack
 local strformat = string.format
 local C_Map = C_Map
 
--- 상태 추적
+-- status tracking
 local activePlates = {}     -- [nameplate] = overlayFrame
 local plateUnitMap = {}     -- [unitToken] = nameplate
-local warnedNPCIDs = {}     -- [npcID] = expireTime (per-NPC ID 경고 쿨다운)
-local processedCombatGUIDs = {} -- [guid] = expireTime (전투 로그 처리 캐시)
+local warnedNPCIDs = {}     -- [npcID] = expireTime (per-NPC ID warning cooldown)
+local processedCombatGUIDs = {} -- [guid] = expireTime (Battle log processing cache)
 
--- 전투 로그 서브이벤트 허용 목록
+-- Battle log subevent whitelist
 local COMBAT_SUBEVENT_ALLOW = {
     SWING_DAMAGE = true,
     SPELL_DAMAGE = true,
@@ -82,7 +82,7 @@ local COMBAT_SUBEVENT_ALLOW = {
 }
 
 -- ============================================
--- 유틸리티 함수
+-- utility function
 -- ============================================
 local function GetNPCID(unit)
     local guid = UnitGUID(unit)
@@ -125,15 +125,15 @@ NS.IsSpider = IsSpider
 NS.GetNPCID = GetNPCID
 
 -- ============================================
--- 거리 추정 시스템
+-- distance estimation system
 -- ============================================
--- IsItemInRange(itemID, unit)로 적과의 거리를 추정.
--- 아이템 ID로 호출하면 소지하지 않아도 동작한다.
--- LibRangeCheck-3.0 (WeakAuras) 참고 아이템 목록.
--- 반환값: true=사거리 내, false=사거리 밖, nil=판정 불가
+-- Estimate the distance to the enemy with IsItemInRange(itemID, unit).
+-- If you call it by item ID, it works even if you don't have it.
+-- LibRangeCheck-3.0 (WeakAuras) Reference item list.
+-- Return value: true=within range, false=outside range, nil=unable to determine
 
--- 적 대상 거리 체크용 아이템 {거리(m), 아이템ID}
--- 거리 오름차순 정렬 (짧은 거리부터 체크)
+-- Item for checking distance to enemy {distance (m), item ID}
+-- Sort in ascending order of distance (check from shortest distances first)
 local RANGE_ITEMS = {
     { 5, 8149},   -- Voodoo Charm
     {10, 9606},   -- Treant Muisek Vessel
@@ -163,7 +163,7 @@ local function EstimateRange(unit)
         elseif inRange == false then
             lastRange = range
         end
-        -- nil이면 해당 아이템 판정 불가, 다음으로
+        -- If nil, the item cannot be judged, then
     end
 
     if lastRange > 0 then
@@ -174,11 +174,11 @@ local function EstimateRange(unit)
 end
 
 -- ============================================
--- 네임플레이트 모델 커버 오버레이
+-- Nameplate Model Cover Overlay
 -- ============================================
--- 네임플레이트는 유닛의 머리 위에 렌더됨.
--- 오버레이를 네임플레이트에서 아래로 오프셋하여
--- 3D 모델(몸통+다리)을 덮는 방식.
+-- Nameplate is rendered above the unit's head.
+-- Offset the overlay down from the nameplate
+-- Method of covering the 3D model (torso + legs).
 
 local overlayPool = {}
 
@@ -188,38 +188,38 @@ local function CreateOverlayFrame()
         frame = CreateFrame("Frame", nil, UIParent)
         frame:SetFrameStrata("TOOLTIP")
 
-        -- 테두리
+        -- outline
         local border = frame:CreateTexture(nil, "BACKGROUND")
         border:SetPoint("TOPLEFT", frame, "TOPLEFT", -3, 3)
         border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 3, -3)
         frame.border = border
 
-        -- 메인 배경
+        -- main background
         local bg = frame:CreateTexture(nil, "ARTWORK")
         bg:SetAllPoints(frame)
         frame.bg = bg
 
-        -- 대체 아이콘
+        -- alternative icon
         local icon = frame:CreateTexture(nil, "OVERLAY")
         icon:SetSize(100, 100)
         icon:SetPoint("CENTER", frame, "CENTER", 0, 16)
         icon:SetTexture("Interface\\AddOns\\NoSpider\\textures\\spidercover")
         frame.icon = icon
 
-        -- 안전 텍스트
+        -- safe text
         local text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         text:SetPoint("CENTER", frame, "CENTER", 0, -14)
         text:SetFont(NS.FONT_KR, 12, "OUTLINE")
         text:SetText(NS.C.LIGHTGREEN .. "안전" .. NS.C.R)
         frame.text = text
 
-        -- NPC 이름 (오버레이 상단)
+        -- NPC name (top of overlay)
         local nameText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         nameText:SetPoint("TOP", frame, "TOP", 0, -8)
         nameText:SetFont(NS.FONT_KR, 9, "OUTLINE")
         frame.nameText = nameText
 
-        -- 거리 텍스트
+        -- street text
         local distText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         distText:SetPoint("CENTER", frame, "CENTER", 0, -34)
         distText:SetFont(NS.FONT_KR, 11, "OUTLINE")
@@ -243,23 +243,23 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     local frame = CreateOverlayFrame()
     local db = NoSpiderDB
 
-    -- 네임플레이트의 자식으로 부착 → 위치 자동 추적
+    -- Attaches as a child of nameplate → automatically tracks location
     frame:SetParent(nameplate)
     frame:SetSize(db.overlayWidth, db.overlayHeight)
     frame:ClearAllPoints()
-    -- 네임플레이트 바로 아래에 부착
+    -- Attached just below the nameplate
     frame:SetPoint("TOP", nameplate, "BOTTOM", 0, 0)
     frame:SetFrameLevel(nameplate:GetFrameLevel() + 20)
 
     ApplyOverlayStyle(frame)
 
-    -- NPC 이름 표시
+    -- Display NPC name
     local name = UnitName(unitToken)
     if name then
         frame.nameText:SetText(NS.C.LIGHTGRAY .. name .. NS.C.R)
     end
 
-    -- 거리 표시 OnUpdate 설정
+    -- Distance Display OnUpdate Settings
     frame.unitToken = unitToken
     frame.distElapsed = 0
     frame.distText:SetText("")
@@ -295,14 +295,14 @@ local function HideNameplateOverlay(nameplate)
 end
 
 -- ============================================
--- 타겟/포커스 초상화 가리기
+-- Hide target/focus portrait
 -- ============================================
 local portraitOverlays = {}
 
 local function CreatePortraitOverlay(portraitTexture, name)
-    -- portraitTexture는 Texture 객체이므로 Frame이 아님.
-    -- 부모 Frame을 가져와서 거기에 오버레이 Frame을 만들고,
-    -- 위치는 portraitTexture에 맞춤.
+    -- portraitTexture is a Texture object, so it is not a Frame.
+    -- Take the parent Frame and create an overlay Frame there,
+    -- The position is tailored to portraitTexture.
     local parentFrame = portraitTexture:GetParent()
     if not parentFrame then return nil end
 
@@ -352,21 +352,21 @@ local function UpdatePortraitOverlay(unitToken, portraitFrame, overlayKey)
 end
 
 -- ============================================
--- 경고 시스템
+-- warning system
 -- ============================================
 local lastWarningTime = 0
 
 local function ShowWarning(unitName, npcID)
     local now = GetTime()
 
-    -- Per-NPC ID 쿨다운 (동일 종류 거미 재경고 차단)
+    -- Per-NPC ID cooldown (blocks re-warning of same type of spider)
     if npcID and warnedNPCIDs[npcID] and now < warnedNPCIDs[npcID] then return end
 
-    -- 글로벌 쿨다운
+    -- Global Cooldown
     if now - lastWarningTime < (NoSpiderDB and NoSpiderDB.warningCooldown or 2) then return end
     lastWarningTime = now
 
-    -- Per-NPC ID 만료 시간 기록
+    -- Per-NPC ID expiration time recording
     if npcID then
         warnedNPCIDs[npcID] = now + (NoSpiderDB and NoSpiderDB.warnedNpcCooldown or 60)
     end
@@ -385,10 +385,10 @@ local function ShowWarning(unitName, npcID)
 end
 
 -- ============================================
--- 지역 기반 사전 경고
+-- Region-based advance warning
 -- ============================================
--- 거미 서식 서브존 진입 시 화면 상단에 상시 배너 표시.
--- GetSubZoneText() 로 현재 서브존명을 얻어 SpiderSubZones DB와 대조.
+-- A banner is always displayed at the top of the screen when entering the spider habitat subzone.
+-- Get the current subzone name with GetSubZoneText() and compare it with SpiderSubZones DB.
 
 local ZW_DEFAULTS = { point = "TOP", parent = UIParent, relPoint = "TOP", x = 0, y = -10 }
 
@@ -415,8 +415,8 @@ zoneWarningFrame.text = zwText
 zoneWarningFrame:Hide()
 
 local WARNING_NONE = 0
-local WARNING_ZONE = 1         -- 지역 진입 (약한 경고)
-local WARNING_PROXIMITY = 2    -- 스폰 좌표 접근 (강한 경고)
+local WARNING_ZONE = 1         -- Entering the area (mild warning)
+local WARNING_PROXIMITY = 2    -- Approaching spawn coordinates (strong warning)
 
 local currentWarningLevel = WARNING_NONE
 
@@ -426,7 +426,7 @@ function NS.UpdateZoneWarningStyle()
     local fs = NoSpiderDB and NoSpiderDB.zoneWarningFontSize or 11
     zoneWarningFrame:SetSize(w, h)
     zwText:SetFont(NS.FONT_KR, fs, "OUTLINE")
-    -- 현재 경고 레벨에 맞는 배경색 갱신
+    -- Update background color to match current warning level
     if currentWarningLevel == WARNING_PROXIMITY then
         zwBg:SetColorTexture(unpack(NoSpiderDB.warnProximityBgColor))
     elseif currentWarningLevel == WARNING_ZONE then
@@ -445,16 +445,16 @@ local function IsSpiderZone(mapID)
 end
 
 -- ============================================
--- 스폰 좌표 접근 감지 (그리드 기반 공간 인덱스)
+-- Spawn coordinate approach detection (grid-based spatial index)
 -- ============================================
--- SpiderSpawnData 좌표(0-100)를 그리드 셀로 분할하여
--- 플레이어 주변 셀만 검색 → O(1)에 가까운 성능.
+-- Split SpiderSpawnData coordinates (0-100) into grid cells
+-- Search only cells around the player → performance close to O(1).
 
 local spawnGridCache = {}       -- [mapID] = cells or false
-local SPAWN_GRID_CELL = 5      -- 0-100 스케일에서 셀 크기
-local DEFAULT_MAP_METERS = 1333 -- C_Map.GetMapWorldSize 폴백 기본값 (미터)
+local SPAWN_GRID_CELL = 5      -- Cell size from 0-100 scale
+local DEFAULT_MAP_METERS = 1333 -- C_Map.GetMapWorldSize Fallback Default (Meters)
 
--- 미터를 맵 좌표(0-100) 스케일로 변환
+-- Convert meters to map coordinates (0-100) scale
 local function MetersToMapUnits(meters, mapID)
     local w
     if C_Map.GetMapWorldSize then
@@ -484,7 +484,7 @@ local function GetSpawnGrid(mapID)
 end
 
 local function IsNearSpiderSpawn(mapID, px, py, radius)
-    -- px, py, radius: 0-100 스케일
+    -- px, py, radius: scale 0-100
     local cells = GetSpawnGrid(mapID)
     if not cells then return false end
     local radiusSq = radius * radius
@@ -520,7 +520,7 @@ local function CheckZone()
 
     local mapID = C_Map.GetBestMapForUnit("player")
 
-    -- 스폰 좌표 접근 경고 (서브존 경고 대체)
+    -- Spawn coordinate approach warning (replaces subzone warning)
     local isNearSpawn = false
     if NoSpiderDB.spawnProximityWarning and mapID then
         local pos = C_Map.GetPlayerMapPosition(mapID, "player")
@@ -562,32 +562,32 @@ local function CheckZone()
 end
 
 -- ============================================
--- 네임플레이트 자동 활성화
+-- Automatically activate nameplate
 -- ============================================
--- NAME_PLATE_UNIT_ADDED는 네임플레이트가 화면에 나타날 때만 발화.
--- 네임플레이트가 꺼져 있으면 거미를 자동 감지할 수 없음.
--- 관련 CVar를 모두 강제 설정.
+-- NAME_PLATE_UNIT_ADDED fires only when the nameplate appears on the screen.
+-- Spiders cannot be automatically detected when the nameplate is turned off.
+-- Force all relevant CVars to be set.
 
 local function EnsureNameplatesEnabled()
     if not NoSpiderDB.autoEnableNameplates then return end
 
     local changed = false
 
-    -- 적 네임플레이트 표시
+    -- Show enemy nameplate
     if GetCVar("nameplateShowEnemies") ~= "1" then
         SetCVar("nameplateShowEnemies", "1")
         changed = true
     end
 
-    -- 네임플레이트 최대 거리 확보 (기본값이 낮을 수 있음)
+    -- Ensure nameplate maximum distance (default may be low)
     local maxDist = tonumber(GetCVar("nameplateMaxDistance") or "0")
     if maxDist < 60 then
         SetCVar("nameplateMaxDistance", "60")
         changed = true
     end
 
-    -- 대상 외 네임플레이트도 표시 (중요!)
-    -- TBC Anniversary에서는 이 설정 없이 타겟만 표시될 수 있음
+    -- Also display non-target nameplates (important!)
+    -- TBC Anniversary may only display targets without this setting
     if GetCVar("nameplateShowAll") and GetCVar("nameplateShowAll") ~= "1" then
         SetCVar("nameplateShowAll", "1")
         changed = true
