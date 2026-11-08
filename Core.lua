@@ -401,7 +401,7 @@ local function ShowWarning(unitName, npcID)
 
     if NoSpiderDB.warningMessage then
         RaidNotice_AddMessage(RaidWarningFrame,
-            NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " 거미 감지: " .. (unitName or "?"),
+            NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " Spider detection: " .. (unitName or "?"),
             ChatTypeInfo["RAID_WARNING"])
     end
 
