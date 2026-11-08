@@ -1,7 +1,6 @@
 -- Core.lua
 -- NoSpider: Core Logic for Arachnophobia Mode Add-on
 -- Nameplate-based 3D model occlusion + automatic detection
-
 local ADDON_NAME, NS = ...
 
 -- ============================================
@@ -9,40 +8,40 @@ local ADDON_NAME, NS = ...
 -- ============================================
 local defaults = {
     enabled = true,
-    overlayAlpha = 0.95,          -- Overlay Opacity
-    namePatternMatch = true,      -- Name-based pattern matching
-    warningSound = true,          -- beep
-    warningMessage = true,        -- warning message
-    overlayColor = { 0.35, 0.55, 0.35 },  -- Overlay color (green color)
-    overlayWidth = 180,           -- Overlay horizontal size
-   overlayHeight = 260, -- Overlay vertical size (to cover entire model) 
+    overlayAlpha = 0.95, -- Overlay Opacity
+    namePatternMatch = true, -- Name-based pattern matching
+    warningSound = true, -- beep
+    warningMessage = true, -- warning message
+    overlayColor = {0.35, 0.55, 0.35}, -- Overlay color (green color)
+    overlayWidth = 180, -- Overlay horizontal size
+    overlayHeight = 260, -- Overlay vertical size (to cover entire model) 
     coverPortrait = true, -- also cover target/focus portrait 
     autoEnableNameplates = true, -- Automatically enable enemy nameplates 
     zoneWarning = true, -- Zone warning banner 
     spawnProximityWarning = true, -- Spawn coordinate approach warning 
     spawnProximityMeters = 100, -- Proximity warning radius (meters)
-    combatLogDetection = true,    -- Battle log secondary detection
-    deadSpiderWarning = true,     -- Dead spider hover warning
-    zoneWarningSound = false,     -- local warning sound
-    warningCooldown = 2,          -- Global Warning Cooldown (seconds)
-    warnedNpcCooldown = 60,       -- Same Type Spider Re-Warning Cooldown (Seconds)
-    scanInterval = 1.5,           -- Nameplate rescan cycle (seconds)
-    showMapPins = true,           -- World map shows spider infestation areas
-    showNPCList = true,           -- World map spider NPC list display
-    dungeonPinSize = 16,          -- Dungeon Pin Icon Size
-    dungeonPinOffset = 2.0,       -- Dungeon Pin Offset (%)
-    heatmapGranularity = 3,       -- Heatmap resolution (1=low 25, 2=normal 50, 3=high 75, 4=very high 100)
-    heatColorLo = { 1, 0.6, 0 },  -- Heatmap low-density color (orange)
-    heatColorHi = { 1, 0.1, 0 },  -- Heatmap High Density Color (Red)
-    zoneWarningWidth = 260,       -- Warning banner horizontal size
-    zoneWarningHeight = 24,       -- Warning banner vertical size
-    zoneWarningFontSize = 11,     -- Warning banner font size
-    warnZoneBgColor = { 0.5, 0.4, 0.1, 0.50 },        -- Local warning banner background color
-    warnProximityBgColor = { 0.4, 0.1, 0.1, 0.65 },    -- Approach warning banner background color
-    zoneWarningPos = nil,         -- Alert banner position (nil=default, {point,x,y})
-    npcListPos = nil,             -- NPC list location (nil=default, {point,x,y})
+    combatLogDetection = true, -- Battle log secondary detection
+    deadSpiderWarning = true, -- Dead spider hover warning
+    zoneWarningSound = false, -- local warning sound
+    warningCooldown = 2, -- Global Warning Cooldown (seconds)
+    warnedNpcCooldown = 60, -- Same Type Spider Re-Warning Cooldown (Seconds)
+    scanInterval = 1.5, -- Nameplate rescan cycle (seconds)
+    showMapPins = true, -- World map shows spider infestation areas
+    showNPCList = true, -- World map spider NPC list display
+    dungeonPinSize = 16, -- Dungeon Pin Icon Size
+    dungeonPinOffset = 2.0, -- Dungeon Pin Offset (%)
+    heatmapGranularity = 3, -- Heatmap resolution (1=low 25, 2=normal 50, 3=high 75, 4=very high 100)
+    heatColorLo = {1, 0.6, 0}, -- Heatmap low-density color (orange)
+    heatColorHi = {1, 0.1, 0}, -- Heatmap High Density Color (Red)
+    zoneWarningWidth = 260, -- Warning banner horizontal size
+    zoneWarningHeight = 24, -- Warning banner vertical size
+    zoneWarningFontSize = 11, -- Warning banner font size
+    warnZoneBgColor = {0.5, 0.4, 0.1, 0.50}, -- Local warning banner background color
+    warnProximityBgColor = {0.4, 0.1, 0.1, 0.65}, -- Approach warning banner background color
+    zoneWarningPos = nil, -- Alert banner position (nil=default, {point,x,y})
+    npcListPos = nil, -- NPC list location (nil=default, {point,x,y})
     customIDs = {},
-    customZones = {},    -- [uiMapID] = true
+    customZones = {} -- [uiMapID] = true
 }
 
 -- ============================================
@@ -64,9 +63,9 @@ local strformat = string.format
 local C_Map = C_Map
 
 -- status tracking
-local activePlates = {}     -- [nameplate] = overlayFrame
-local plateUnitMap = {}     -- [unitToken] = nameplate
-local warnedNPCIDs = {}     -- [npcID] = expireTime (per-NPC ID warning cooldown)
+local activePlates = {} -- [nameplate] = overlayFrame
+local plateUnitMap = {} -- [unitToken] = nameplate
+local warnedNPCIDs = {} -- [npcID] = expireTime (per-NPC ID warning cooldown)
 local processedCombatGUIDs = {} -- [guid] = expireTime (Battle log processing cache)
 
 -- Battle log subevent whitelist
@@ -78,7 +77,7 @@ local COMBAT_SUBEVENT_ALLOW = {
     SPELL_SUMMON = true,
     UNIT_DIED = true,
     RANGE_DAMAGE = true,
-    SPELL_MISSED = true,
+    SPELL_MISSED = true
 }
 
 -- ============================================
@@ -86,14 +85,20 @@ local COMBAT_SUBEVENT_ALLOW = {
 -- ============================================
 local function GetNPCID(unit)
     local guid = UnitGUID(unit)
-    if not guid then return nil end
+    if not guid then
+        return nil
+    end
     local id = select(6, strsplit("-", guid))
     return tonumber(id)
 end
 
 local function IsSpiderByID(npcID)
-    if not npcID then return false end
-    if NS.SpiderIDs[npcID] then return true end
+    if not npcID then
+        return false
+    end
+    if NS.SpiderIDs[npcID] then
+        return true
+    end
     if NoSpiderDB and NoSpiderDB.customIDs then
         return NoSpiderDB.customIDs[npcID] == true
     end
@@ -101,9 +106,13 @@ local function IsSpiderByID(npcID)
 end
 
 local function IsSpiderByName(unit)
-    if not NoSpiderDB or not NoSpiderDB.namePatternMatch then return false end
+    if not NoSpiderDB or not NoSpiderDB.namePatternMatch then
+        return false
+    end
     local name = UnitName(unit)
-    if not name then return false end
+    if not name then
+        return false
+    end
     name = strlower(name)
     for _, pattern in pairs(NS.SpiderNamePatterns) do
         if strfind(name, strlower(pattern), 1, true) then
@@ -114,10 +123,16 @@ local function IsSpiderByName(unit)
 end
 
 local function IsSpider(unit)
-    if not unit then return false end
+    if not unit then
+        return false
+    end
     local npcID = GetNPCID(unit)
-    if IsSpiderByID(npcID) then return true end
-    if IsSpiderByName(unit) then return true end
+    if IsSpiderByID(npcID) then
+        return true
+    end
+    if IsSpiderByName(unit) then
+        return true
+    end
     return false
 end
 
@@ -134,15 +149,14 @@ NS.GetNPCID = GetNPCID
 
 -- Item for checking distance to enemy {distance (m), item ID}
 -- Sort in ascending order of distance (check from shortest distances first)
-local RANGE_ITEMS = {
-    { 5, 8149},   -- Voodoo Charm
-    {10, 9606},   -- Treant Muisek Vessel
-    {15, 4559},   -- Hydrocane
-    {20, 10645},  -- Gnomish Death Ray
-    {25, 13289},  -- Egan's Blaster
-    {30, 835},    -- Large Rope Net
-    {35, 8688},   -- Fate Rune
-    {40, 4945},   -- Skin of Shadow
+local RANGE_ITEMS = {{5, 8149}, -- Voodoo Charm
+{10, 9606}, -- Treant Muisek Vessel
+{15, 4559}, -- Hydrocane
+{20, 10645}, -- Gnomish Death Ray
+{25, 13289}, -- Egan's Blaster
+{30, 835}, -- Large Rope Net
+{35, 8688}, -- Fate Rune
+{40, 4945} -- Skin of Shadow
 }
 
 local function EstimateRange(unit)
@@ -238,7 +252,9 @@ local function ApplyOverlayStyle(frame)
 end
 
 local function ShowNameplateOverlay(nameplate, unitToken)
-    if activePlates[nameplate] then return end
+    if activePlates[nameplate] then
+        return
+    end
 
     local frame = CreateOverlayFrame()
     local db = NoSpiderDB
@@ -265,7 +281,9 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     frame.distText:SetText("")
     frame:SetScript("OnUpdate", function(self, elapsed)
         self.distElapsed = (self.distElapsed or 0) + elapsed
-        if self.distElapsed < 0.2 then return end
+        if self.distElapsed < 0.2 then
+            return
+        end
         self.distElapsed = 0
 
         local rangeText = EstimateRange(self.unitToken)
@@ -304,7 +322,9 @@ local function CreatePortraitOverlay(portraitTexture, name)
     -- Take the parent Frame and create an overlay Frame there,
     -- The position is tailored to portraitTexture.
     local parentFrame = portraitTexture:GetParent()
-    if not parentFrame then return nil end
+    if not parentFrame then
+        return nil
+    end
 
     local frame = CreateFrame("Frame", "NoSpider_" .. name, parentFrame)
     frame:SetAllPoints(portraitTexture)
@@ -333,11 +353,15 @@ local function UpdatePortraitOverlay(unitToken, portraitFrame, overlayKey)
         return
     end
 
-    if not portraitFrame then return end
+    if not portraitFrame then
+        return
+    end
 
     if not portraitOverlays[overlayKey] then
         portraitOverlays[overlayKey] = CreatePortraitOverlay(portraitFrame, overlayKey)
-        if not portraitOverlays[overlayKey] then return end
+        if not portraitOverlays[overlayKey] then
+            return
+        end
     end
 
     local overlay = portraitOverlays[overlayKey]
@@ -360,10 +384,14 @@ local function ShowWarning(unitName, npcID)
     local now = GetTime()
 
     -- Per-NPC ID cooldown (blocks re-warning of same type of spider)
-    if npcID and warnedNPCIDs[npcID] and now < warnedNPCIDs[npcID] then return end
+    if npcID and warnedNPCIDs[npcID] and now < warnedNPCIDs[npcID] then
+        return
+    end
 
     -- Global Cooldown
-    if now - lastWarningTime < (NoSpiderDB and NoSpiderDB.warningCooldown or 2) then return end
+    if now - lastWarningTime < (NoSpiderDB and NoSpiderDB.warningCooldown or 2) then
+        return
+    end
     lastWarningTime = now
 
     -- Per-NPC ID expiration time recording
@@ -372,11 +400,9 @@ local function ShowWarning(unitName, npcID)
     end
 
     if NoSpiderDB.warningMessage then
-        RaidNotice_AddMessage(
-            RaidWarningFrame,
+        RaidNotice_AddMessage(RaidWarningFrame,
             NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " 거미 감지: " .. (unitName or "?"),
-            ChatTypeInfo["RAID_WARNING"]
-        )
+            ChatTypeInfo["RAID_WARNING"])
     end
 
     if NoSpiderDB.warningSound then
@@ -390,10 +416,16 @@ end
 -- A banner is always displayed at the top of the screen when entering the spider habitat subzone.
 -- Get the current subzone name with GetSubZoneText() and compare it with SpiderSubZones DB.
 
-local ZW_DEFAULTS = { point = "TOP", parent = UIParent, relPoint = "TOP", x = 0, y = -10 }
+local ZW_DEFAULTS = {
+    point = "TOP",
+    parent = UIParent,
+    relPoint = "TOP",
+    x = 0,
+    y = -10
+}
 
 local zoneWarningFrame = CreateFrame("Frame", "NoSpiderZoneWarning", UIParent)
-zoneWarningFrame:SetSize(260, 24)  -- InitDB 후 갱신됨
+zoneWarningFrame:SetSize(260, 24) -- InitDB 후 갱신됨
 zoneWarningFrame:SetPoint("TOP", UIParent, "TOP", 0, -10)
 zoneWarningFrame:SetFrameStrata("HIGH")
 
@@ -415,8 +447,8 @@ zoneWarningFrame.text = zwText
 zoneWarningFrame:Hide()
 
 local WARNING_NONE = 0
-local WARNING_ZONE = 1         -- Entering the area (mild warning)
-local WARNING_PROXIMITY = 2    -- Approaching spawn coordinates (strong warning)
+local WARNING_ZONE = 1 -- Entering the area (mild warning)
+local WARNING_PROXIMITY = 2 -- Approaching spawn coordinates (strong warning)
 
 local currentWarningLevel = WARNING_NONE
 
@@ -436,8 +468,12 @@ end
 local currentZoneName = ""
 
 local function IsSpiderZone(mapID)
-    if not mapID then return false end
-    if NS.SpiderZones[mapID] then return true end
+    if not mapID then
+        return false
+    end
+    if NS.SpiderZones[mapID] then
+        return true
+    end
     if NoSpiderDB and NoSpiderDB.customZones then
         return NoSpiderDB.customZones[mapID] == true
     end
@@ -450,8 +486,8 @@ end
 -- Split SpiderSpawnData coordinates (0-100) into grid cells
 -- Search only cells around the player → performance close to O(1).
 
-local spawnGridCache = {}       -- [mapID] = cells or false
-local SPAWN_GRID_CELL = 5      -- Cell size from 0-100 scale
+local spawnGridCache = {} -- [mapID] = cells or false
+local SPAWN_GRID_CELL = 5 -- Cell size from 0-100 scale
 local DEFAULT_MAP_METERS = 1333 -- C_Map.GetMapWorldSize Fallback Default (Meters)
 
 -- Convert meters to map coordinates (0-100) scale
@@ -460,12 +496,16 @@ local function MetersToMapUnits(meters, mapID)
     if C_Map.GetMapWorldSize then
         w = C_Map.GetMapWorldSize(mapID)
     end
-    if not w or w <= 0 then w = DEFAULT_MAP_METERS end
+    if not w or w <= 0 then
+        w = DEFAULT_MAP_METERS
+    end
     return (meters / w) * 100
 end
 
 local function GetSpawnGrid(mapID)
-    if spawnGridCache[mapID] ~= nil then return spawnGridCache[mapID] end
+    if spawnGridCache[mapID] ~= nil then
+        return spawnGridCache[mapID]
+    end
     local spawns = NS.SpiderSpawnData and NS.SpiderSpawnData[mapID]
     if not spawns or #spawns == 0 then
         spawnGridCache[mapID] = false
@@ -475,8 +515,12 @@ local function GetSpawnGrid(mapID)
     for _, c in ipairs(spawns) do
         local gx = math.floor(c[1] / SPAWN_GRID_CELL)
         local gy = math.floor(c[2] / SPAWN_GRID_CELL)
-        if not cells[gx] then cells[gx] = {} end
-        if not cells[gx][gy] then cells[gx][gy] = {} end
+        if not cells[gx] then
+            cells[gx] = {}
+        end
+        if not cells[gx][gy] then
+            cells[gx][gy] = {}
+        end
         cells[gx][gy][#cells[gx][gy] + 1] = c
     end
     spawnGridCache[mapID] = cells
@@ -486,7 +530,9 @@ end
 local function IsNearSpiderSpawn(mapID, px, py, radius)
     -- px, py, radius: scale 0-100
     local cells = GetSpawnGrid(mapID)
-    if not cells then return false end
+    if not cells then
+        return false
+    end
     local radiusSq = radius * radius
     local cr = math.ceil(radius / SPAWN_GRID_CELL)
     local pgx = math.floor(px / SPAWN_GRID_CELL)
@@ -538,9 +584,10 @@ local function CheckZone()
             currentWarningLevel = WARNING_PROXIMITY
             currentZoneName = (mapID and C_Map.GetMapInfo(mapID) and C_Map.GetMapInfo(mapID).name) or ""
             zwBg:SetColorTexture(unpack(NoSpiderDB.warnProximityBgColor))
-            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTYELLOW .. "[경고] 거미 출몰 좌표 접근" .. NS.C.R)
+            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTYELLOW ..
+                               "[Warning] Approaching spider infestation coordinates" .. NS.C.R)
             zoneWarningFrame:Show()
-            ShowWarning("거미 출몰 좌표 접근")
+            ShowWarning("Accessing spider haunt coordinates")
         end
     elseif isSpiderZ and NoSpiderDB.zoneWarning then
         local zoneName = (mapID and C_Map.GetMapInfo(mapID) and C_Map.GetMapInfo(mapID).name) or ""
@@ -548,7 +595,8 @@ local function CheckZone()
             currentWarningLevel = WARNING_ZONE
             currentZoneName = zoneName
             zwBg:SetColorTexture(unpack(NoSpiderDB.warnZoneBgColor))
-            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTORANGE .. "[주의] 거미 출몰 지역" .. NS.C.R .. " - " .. zoneName)
+            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTORANGE ..
+                               "[Caution] Spider-infested area" .. NS.C.R .. " - " .. zoneName)
             zoneWarningFrame:Show()
             if NoSpiderDB.zoneWarningSound then
                 ShowWarning(zoneName)
@@ -569,7 +617,9 @@ end
 -- Force all relevant CVars to be set.
 
 local function EnsureNameplatesEnabled()
-    if not NoSpiderDB.autoEnableNameplates then return end
+    if not NoSpiderDB.autoEnableNameplates then
+        return
+    end
 
     local changed = false
 
@@ -594,8 +644,9 @@ local function EnsureNameplatesEnabled()
     end
 
     if changed then
-        print(NS.C.PREFIX .. "거미 자동 감지를 위해 네임플레이트 설정을 조정했습니다.")
-        print(NS.C.PREFIX .. "적 네임플레이트가 보이지 않으면 " .. NS.C.YELLOW .. "V키" .. NS.C.R .. "를 눌러주세요.")
+        print(NS.C.PREFIX .. "Adjusted nameplate settings for automatic detection of spiders.")
+        print(NS.C.PREFIX .. "If you do not see the enemy nameplate, press " .. NS.C.YELLOW .. "V key" .. NS.C.R .. "")
+
     end
 end
 
@@ -603,10 +654,14 @@ end
 -- 이벤트 핸들러
 -- ============================================
 local function OnNamePlateAdded(unitToken)
-    if not NoSpiderDB or not NoSpiderDB.enabled then return end
+    if not NoSpiderDB or not NoSpiderDB.enabled then
+        return
+    end
 
     local nameplate = GetNamePlateForUnit(unitToken)
-    if not nameplate then return end
+    if not nameplate then
+        return
+    end
 
     plateUnitMap[unitToken] = nameplate
 
@@ -673,10 +728,14 @@ local scanFrame = CreateFrame("Frame", nil, UIParent)
 local scanElapsed = 0
 
 scanFrame:SetScript("OnUpdate", function(self, elapsed)
-    if not NoSpiderDB or not NoSpiderDB.enabled then return end
+    if not NoSpiderDB or not NoSpiderDB.enabled then
+        return
+    end
 
     scanElapsed = scanElapsed + elapsed
-    if scanElapsed < (NoSpiderDB.scanInterval or 1.5) then return end
+    if scanElapsed < (NoSpiderDB.scanInterval or 1.5) then
+        return
+    end
     scanElapsed = 0
 
     for i = 1, 40 do
@@ -718,27 +777,39 @@ end)
 local PROCESSED_COMBAT_GUID_COOLDOWN = 3
 
 local function OnCombatLogEvent()
-    if not NoSpiderDB or not NoSpiderDB.enabled then return end
-    if not NoSpiderDB.combatLogDetection then return end
+    if not NoSpiderDB or not NoSpiderDB.enabled then
+        return
+    end
+    if not NoSpiderDB.combatLogDetection then
+        return
+    end
 
     local _, subEvent, _, sourceGUID, sourceName, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
 
     -- 서브이벤트 필터링 (반복성 이벤트 조기 리턴)
-    if not COMBAT_SUBEVENT_ALLOW[subEvent] then return end
+    if not COMBAT_SUBEVENT_ALLOW[subEvent] then
+        return
+    end
 
     local now = GetTime()
 
     -- source나 dest 중 거미 NPC가 있는지 확인
     local function CheckGUID(guid, name)
-        if not guid then return end
+        if not guid then
+            return
+        end
 
         -- Per-GUID 처리 캐시 (동일 GUID 반복 스캔 방지)
-        if processedCombatGUIDs[guid] and now < processedCombatGUIDs[guid] then return end
+        if processedCombatGUIDs[guid] and now < processedCombatGUIDs[guid] then
+            return
+        end
         processedCombatGUIDs[guid] = now + PROCESSED_COMBAT_GUID_COOLDOWN
 
         local id = select(6, strsplit("-", guid))
         local npcID = tonumber(id)
-        if not IsSpiderByID(npcID) then return end
+        if not IsSpiderByID(npcID) then
+            return
+        end
 
         -- 이 NPC의 네임플레이트 찾기
         for i = 1, 40 do
@@ -776,12 +847,7 @@ local function PrintDebugInfo()
     print(p .. "애드온 활성: " .. tostring(NoSpiderDB and NoSpiderDB.enabled))
 
     -- CVar 상태
-    local cvars = {
-        "nameplateShowEnemies",
-        "nameplateShowAll",
-        "nameplateMaxDistance",
-        "nameplateShowFriends",
-    }
+    local cvars = {"nameplateShowEnemies", "nameplateShowAll", "nameplateMaxDistance", "nameplateShowFriends"}
     for _, cvar in pairs(cvars) do
         local val = GetCVar(cvar)
         print(p .. cvar .. " = " .. tostring(val))
@@ -797,15 +863,20 @@ local function PrintDebugInfo()
             local name = UnitName(unitToken) or "?"
             local npcID = GetNPCID(unitToken)
             local spider = IsSpider(unitToken)
-            if spider then spiderPlateCount = spiderPlateCount + 1 end
-            print(p .. "  nameplate" .. i .. ": " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" .. tostring(spider))
+            if spider then
+                spiderPlateCount = spiderPlateCount + 1
+            end
+            print(p .. "  nameplate" .. i .. ": " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" ..
+                      tostring(spider))
         end
     end
     print(p .. "네임플레이트 총: " .. plateCount .. ", 거미: " .. spiderPlateCount)
 
     -- 활성 오버레이 수
     local overlayCount = 0
-    for _ in pairs(activePlates) do overlayCount = overlayCount + 1 end
+    for _ in pairs(activePlates) do
+        overlayCount = overlayCount + 1
+    end
     print(p .. "활성 오버레이: " .. overlayCount)
 
     -- 타겟 정보
@@ -814,7 +885,9 @@ local function PrintDebugInfo()
         local npcID = GetNPCID("target")
         local spider = IsSpider("target")
         local np = GetNamePlateForUnit("target")
-        print(p .. "타겟: " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" .. tostring(spider) .. " nameplate=" .. tostring(np ~= nil))
+        print(
+            p .. "타겟: " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" .. tostring(spider) .. " nameplate=" ..
+                tostring(np ~= nil))
     else
         print(p .. "타겟: 없음")
     end
@@ -830,11 +903,9 @@ local function PrintDebugInfo()
             local ok, err = pcall(function()
                 for pin in WorldMapFrame:EnumeratePinsByTemplate("DungeonEntrancePinTemplate") do
                     pinCount = pinCount + 1
-                    print(p .. strformat("  핀 #%d: name=%s, journalID=%s, hooked=%s",
-                        pinCount,
-                        tostring(pin.name),
-                        tostring(pin.journalInstanceID),
-                        tostring(pin._noSpiderHooked)))
+                    print(p ..
+                              strformat("  핀 #%d: name=%s, journalID=%s, hooked=%s", pinCount, tostring(pin.name),
+                            tostring(pin.journalInstanceID), tostring(pin._noSpiderHooked)))
                     if pin.name and NS.SpiderDungeonTooltips then
                         local match = NS.SpiderDungeonTooltips[pin.name]
                         print(p .. strformat("    매칭: %s", match and ("NPC " .. #match .. "개") or "없음"))
@@ -854,7 +925,9 @@ local function PrintDebugInfo()
             for template, pool in pairs(WorldMapFrame.pinPools) do
                 local n = 0
                 if pool.activeObjects then
-                    for _ in pairs(pool.activeObjects) do n = n + 1 end
+                    for _ in pairs(pool.activeObjects) do
+                        n = n + 1
+                    end
                 end
                 if n > 0 then
                     print(p .. strformat("  %s: %d개", template, n))
@@ -885,7 +958,9 @@ NS.activePlates = activePlates
 NS.portraitOverlays = portraitOverlays
 
 function NS.UpdateAllOverlayStyles()
-    for _, frame in pairs(activePlates) do ApplyOverlayStyle(frame) end
+    for _, frame in pairs(activePlates) do
+        ApplyOverlayStyle(frame)
+    end
     for _, overlay in pairs(portraitOverlays) do
         local r, g, b = unpack(NoSpiderDB.overlayColor)
         overlay.bg:SetColorTexture(r, g, b, NoSpiderDB.overlayAlpha)
@@ -903,13 +978,14 @@ function NS.ResetDB()
     for k, v in pairs(defaults) do
         if type(v) == "table" then
             NoSpiderDB[k] = {}
-            for kk, vv in pairs(v) do NoSpiderDB[k][kk] = vv end
+            for kk, vv in pairs(v) do
+                NoSpiderDB[k][kk] = vv
+            end
         else
             NoSpiderDB[k] = v
         end
     end
 end
-
 
 -- ============================================
 -- 초기화
@@ -922,7 +998,9 @@ local function InitDB()
         if NoSpiderDB[k] == nil then
             if type(v) == "table" then
                 NoSpiderDB[k] = {}
-                for kk, vv in pairs(v) do NoSpiderDB[k][kk] = vv end
+                for kk, vv in pairs(v) do
+                    NoSpiderDB[k][kk] = vv
+                end
             else
                 NoSpiderDB[k] = v
             end
@@ -962,8 +1040,10 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         if addonName == ADDON_NAME then
             InitDB()
             print(NS.C.PREFIX .. "거미 공포증 모드 v1.0 로드! /ns help")
-            print(NS.C.PREFIX .. "자동 감지를 위해 적 네임플레이트가 켜져 있어야 합니다. (" .. NS.C.YELLOW .. "V키" .. NS.C.R .. ")")
-            print(NS.C.PREFIX .. NS.C.GOLD .. "오버레이 방식이므로 일부 상황에서 모델이 노출될 수 있습니다." .. NS.C.R)
+            print(NS.C.PREFIX .. "자동 감지를 위해 적 네임플레이트가 켜져 있어야 합니다. (" ..
+                      NS.C.YELLOW .. "V키" .. NS.C.R .. ")")
+            print(NS.C.PREFIX .. NS.C.GOLD ..
+                      "오버레이 방식이므로 일부 상황에서 모델이 노출될 수 있습니다." .. NS.C.R)
             print(NS.C.PREFIX .. "문제 발생 시 " .. NS.C.YELLOW .. "/ns debug" .. NS.C.R .. " 로 진단하세요.")
             -- 경고 배너 스타일 복원
             NS.UpdateZoneWarningStyle()
@@ -980,7 +1060,9 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                     ScanExistingNameplates()
                     CheckZone()
                 end
-                if NS.RefreshMapOverlay then NS.RefreshMapOverlay() end
+                if NS.RefreshMapOverlay then
+                    NS.RefreshMapOverlay()
+                end
             end)
             self:UnregisterEvent("ADDON_LOADED")
         end
@@ -1000,9 +1082,8 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
         -- 죽은 거미(시체)에 마우스오버 시에만 경고
         -- 살아있는 거미는 오버레이로 이미 가려져 있으므로 경고 불필요
-        if NoSpiderDB and NoSpiderDB.enabled and NoSpiderDB.deadSpiderWarning
-            and UnitExists("mouseover")
-            and IsSpider("mouseover") and UnitIsDead("mouseover") then
+        if NoSpiderDB and NoSpiderDB.enabled and NoSpiderDB.deadSpiderWarning and UnitExists("mouseover") and
+            IsSpider("mouseover") and UnitIsDead("mouseover") then
             ShowWarning(UnitName("mouseover"), GetNPCID("mouseover"))
         end
 
