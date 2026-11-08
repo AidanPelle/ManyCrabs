@@ -651,7 +651,7 @@ local function EnsureNameplatesEnabled()
 end
 
 -- ============================================
--- 이벤트 핸들러
+-- event handler
 -- ============================================
 local function OnNamePlateAdded(unitToken)
     if not NoSpiderDB or not NoSpiderDB.enabled then
@@ -667,7 +667,7 @@ local function OnNamePlateAdded(unitToken)
 
     if IsSpider(unitToken) then
         ShowNameplateOverlay(nameplate, unitToken)
-        -- 오버레이로 가려졌으므로 경고 불필요
+        -- No warning required as it is covered by an overlay
     end
 end
 
@@ -688,7 +688,7 @@ local function OnFocusChanged()
 end
 
 -- ============================================
--- 스캔 / 정리
+-- Scan/Clean
 -- ============================================
 local function ScanExistingNameplates()
     for i = 1, 40 do
@@ -718,11 +718,11 @@ local function ClearAllOverlays()
     currentZoneName = ""
 end
 
--- ============================================
--- 주기적 네임플레이트 리스캔 (안전망)
--- ============================================
--- NAME_PLATE_UNIT_ADDED를 놓치는 경우를 대비하여
--- 1.5초마다 현재 보이는 모든 네임플레이트를 재검사.
+-- =========================================== 
+-- Periodic nameplate rescan (safety net) 
+-- =========================================== 
+-- In case you miss NAME_PLATE_UNIT_ADDED 
+-- Recheck all currently visible nameplates every 1.5 seconds.
 
 local scanFrame = CreateFrame("Frame", nil, UIParent)
 local scanElapsed = 0
@@ -745,7 +745,7 @@ scanFrame:SetScript("OnUpdate", function(self, elapsed)
             if nameplate and not activePlates[nameplate] and IsSpider(unitToken) then
                 plateUnitMap[unitToken] = nameplate
                 ShowNameplateOverlay(nameplate, unitToken)
-                -- 리스캔에서 발견 시 경고는 생략 (이미 근처에 있으므로)
+                -- Omit warning when found in rescan (since it is already nearby)
             end
         end
     end
@@ -763,16 +763,16 @@ scanFrame:SetScript("OnUpdate", function(self, elapsed)
         end
     end
 
-    -- 스폰 좌표 접근 검사 (주기적)
+    -- Spawn coordinate approach check (periodically)
     CheckZone()
 end)
 
--- ============================================
--- 전투 로그 보조 감지
--- ============================================
--- 전투 중 거미의 GUID가 로그에 나타나면
--- 해당 유닛의 네임플레이트를 찾아 오버레이 적용.
--- NAME_PLATE_UNIT_ADDED를 보완하는 역할.
+-- =========================================== 
+-- Battle log secondary detection 
+-- =========================================== 
+-- If the spider's GUID appears in the log during combat, 
+-- Find the nameplate of the unit and apply the overlay. 
+-- A role that complements NAME_PLATE_UNIT_ADDED.
 
 local PROCESSED_COMBAT_GUID_COOLDOWN = 3
 
@@ -786,20 +786,20 @@ local function OnCombatLogEvent()
 
     local _, subEvent, _, sourceGUID, sourceName, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
 
-    -- 서브이벤트 필터링 (반복성 이벤트 조기 리턴)
+    -- Sub-event filtering (early return of repeatable events)
     if not COMBAT_SUBEVENT_ALLOW[subEvent] then
         return
     end
 
     local now = GetTime()
 
-    -- source나 dest 중 거미 NPC가 있는지 확인
+    -- Check if there is a spider NPC in source or dest
     local function CheckGUID(guid, name)
         if not guid then
             return
         end
 
-        -- Per-GUID 처리 캐시 (동일 GUID 반복 스캔 방지)
+        -- Per-GUID processing cache (prevents repeated scanning of the same GUID)
         if processedCombatGUIDs[guid] and now < processedCombatGUIDs[guid] then
             return
         end
@@ -810,8 +810,7 @@ local function OnCombatLogEvent()
         if not IsSpiderByID(npcID) then
             return
         end
-
-        -- 이 NPC의 네임플레이트 찾기
+        -- Find this NPC's nameplate
         for i = 1, 40 do
             local unitToken = "nameplate" .. i
             if UnitExists(unitToken) then
@@ -821,14 +820,14 @@ local function OnCombatLogEvent()
                     if nameplate and not activePlates[nameplate] then
                         plateUnitMap[unitToken] = nameplate
                         ShowNameplateOverlay(nameplate, unitToken)
-                        -- 오버레이로 가려졌으므로 경고 불필요
+                        -- No warning required as it is covered by an overlay
                     end
                     return
                 end
             end
         end
 
-        -- 네임플레이트 밖 (먼 거리) → 사전 경고
+        -- Outside the nameplate (far away) → Advance warning
         ShowWarning(name, npcID)
     end
 
@@ -837,7 +836,7 @@ local function OnCombatLogEvent()
 end
 
 -- ============================================
--- 디버그
+-- debug
 -- ============================================
 local debugMode = false
 
@@ -846,14 +845,14 @@ local function PrintDebugInfo()
     print(p .. "=== 상태 진단 ===")
     print(p .. "애드온 활성: " .. tostring(NoSpiderDB and NoSpiderDB.enabled))
 
-    -- CVar 상태
+    -- CVar status
     local cvars = {"nameplateShowEnemies", "nameplateShowAll", "nameplateMaxDistance", "nameplateShowFriends"}
     for _, cvar in pairs(cvars) do
         local val = GetCVar(cvar)
         print(p .. cvar .. " = " .. tostring(val))
     end
 
-    -- 현재 보이는 네임플레이트 수
+    -- Number of currently visible nameplates
     local plateCount = 0
     local spiderPlateCount = 0
     for i = 1, 40 do
@@ -870,33 +869,33 @@ local function PrintDebugInfo()
                       tostring(spider))
         end
     end
-    print(p .. "네임플레이트 총: " .. plateCount .. ", 거미: " .. spiderPlateCount)
+    print(p .. "nameplate total: " .. plateCount .. ", spider: " .. spiderPlateCount)
 
-    -- 활성 오버레이 수
+    -- Number of active overlays
     local overlayCount = 0
     for _ in pairs(activePlates) do
         overlayCount = overlayCount + 1
     end
-    print(p .. "활성 오버레이: " .. overlayCount)
+    print(p .. "Active overlay: " .. overlayCount)
 
-    -- 타겟 정보
+    -- Target information
     if UnitExists("target") then
         local name = UnitName("target") or "?"
         local npcID = GetNPCID("target")
         local spider = IsSpider("target")
         local np = GetNamePlateForUnit("target")
         print(
-            p .. "타겟: " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" .. tostring(spider) .. " nameplate=" ..
+            p .. "target: " .. name .. " (ID:" .. tostring(npcID) .. ") spider=" .. tostring(spider) .. " nameplate=" ..
                 tostring(np ~= nil))
     else
-        print(p .. "타겟: 없음")
+        print(p .. "Target: None")
     end
 
-    -- 월드맵 핀 디버그 (월드맵이 열려있을 때만)
+    -- Debug world map pins (only when world map is open)
     if WorldMapFrame and WorldMapFrame:IsShown() then
-        print(p .. "=== 월드맵 핀 디버그 ===")
+        print(p .. "=== World Map Pin Debug ===")
         local wmID = WorldMapFrame:GetMapID()
-        print(p .. "월드맵 ID: " .. tostring(wmID))
+        print(p .. "World Map ID:" .. tostring(wmID))
 
         if WorldMapFrame.EnumeratePinsByTemplate then
             local pinCount = 0
@@ -908,7 +907,7 @@ local function PrintDebugInfo()
                             tostring(pin.journalInstanceID), tostring(pin._noSpiderHooked)))
                     if pin.name and NS.SpiderDungeonTooltips then
                         local match = NS.SpiderDungeonTooltips[pin.name]
-                        print(p .. strformat("    매칭: %s", match and ("NPC " .. #match .. "개") or "없음"))
+                        print(p .. strformat("    matching: %s", match and ("NPC " .. #match .. "dog") or "doesn't exist"))
                     end
                 end
             end)
@@ -916,12 +915,12 @@ local function PrintDebugInfo()
                 print(p .. "|cFFFF0000EnumeratePinsByTemplate 오류: " .. tostring(err) .. "|r")
             end
             if pinCount == 0 then
-                print(p .. "던전 핀 없음")
+                print(p .. "No dungeon pins")
             end
         end
 
         if WorldMapFrame.pinPools then
-            print(p .. "--- 핀 템플릿 ---")
+            print(p .. "--- pin template ---")
             for template, pool in pairs(WorldMapFrame.pinPools) do
                 local n = 0
                 if pool.activeObjects then
@@ -930,17 +929,17 @@ local function PrintDebugInfo()
                     end
                 end
                 if n > 0 then
-                    print(p .. strformat("  %s: %d개", template, n))
+                    print(p .. strformat("  %s: %ddog", template, n))
                 end
             end
         end
     end
 
-    print(p .. "=== V키를 눌러 적 네임플레이트가 보이는지 확인하세요 ===")
+    print(p .. "=== Press V to see if the enemy nameplate is visible. ===")
 end
 
 -- ============================================
--- NS 공개 API (SlashCommands.lua, OptionsPanel.lua 에서 참조)
+-- NS public API (referenced in SlashCommands.lua, OptionsPanel.lua)
 -- ============================================
 NS.EnsureNameplatesEnabled = EnsureNameplatesEnabled
 NS.ScanExistingNameplates = ScanExistingNameplates
@@ -988,7 +987,7 @@ function NS.ResetDB()
 end
 
 -- ============================================
--- 초기화
+-- reset
 -- ============================================
 local function InitDB()
     if not NoSpiderDB then
@@ -1006,12 +1005,12 @@ local function InitDB()
             end
         end
     end
-    -- warnedGuidCooldown → warnedNpcCooldown 마이그레이션
+    -- warned Guild Cooldown → warned Npc Cooldown migration
     if NoSpiderDB.warnedGuidCooldown then
         NoSpiderDB.warnedNpcCooldown = NoSpiderDB.warnedGuidCooldown
         NoSpiderDB.warnedGuidCooldown = nil
     end
-    -- spawnProximityRadius (맵 비율) → spawnProximityMeters (미터) 마이그레이션
+    -- spawn Proximity Radius (map ratio) → spawn Proximity Meters (meters) migration
     if NoSpiderDB.spawnProximityRadius then
         NoSpiderDB.spawnProximityMeters = math.floor(NoSpiderDB.spawnProximityRadius * DEFAULT_MAP_METERS + 0.5)
         NoSpiderDB.spawnProximityRadius = nil
@@ -1019,7 +1018,7 @@ local function InitDB()
 end
 
 -- ============================================
--- 이벤트 등록
+-- Event registration
 -- ============================================
 local eventFrame = CreateFrame("Frame", "NoSpiderEventFrame", UIParent)
 
@@ -1039,16 +1038,16 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         local addonName = ...
         if addonName == ADDON_NAME then
             InitDB()
-            print(NS.C.PREFIX .. "거미 공포증 모드 v1.0 로드! /ns help")
-            print(NS.C.PREFIX .. "자동 감지를 위해 적 네임플레이트가 켜져 있어야 합니다. (" ..
-                      NS.C.YELLOW .. "V키" .. NS.C.R .. ")")
+            print(NS.C.PREFIX .. "Loading Arachnophobia Mod v1.0! /ns help")
+            print(NS.C.PREFIX .. "Enemy nameplate must be turned on for auto-detection. (" ..
+                      NS.C.YELLOW .. "V key" .. NS.C.R .. ")")
             print(NS.C.PREFIX .. NS.C.GOLD ..
-                      "오버레이 방식이므로 일부 상황에서 모델이 노출될 수 있습니다." .. NS.C.R)
-            print(NS.C.PREFIX .. "문제 발생 시 " .. NS.C.YELLOW .. "/ns debug" .. NS.C.R .. " 로 진단하세요.")
-            -- 경고 배너 스타일 복원
+                      "Because it is an overlay method, the model may be exposed in some situations." .. NS.C.R)
+            print(NS.C.PREFIX .. "When a problem occurs " .. NS.C.YELLOW .. "/ns debug" .. NS.C.R .. " Diagnose with.")
+            -- Restore warning banner style
             NS.UpdateZoneWarningStyle()
 
-            -- 저장된 프레임 위치 복원
+            -- Restore saved frame positions
             NS.RestorePosition(zoneWarningFrame, "zoneWarningPos", ZW_DEFAULTS)
             if NS.npcListFrame and NS.NPC_LIST_DEFAULTS then
                 NS.RestorePosition(NS.npcListFrame, "npcListPos", NS.NPC_LIST_DEFAULTS)
@@ -1080,8 +1079,8 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         OnFocusChanged()
 
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        -- 죽은 거미(시체)에 마우스오버 시에만 경고
-        -- 살아있는 거미는 오버레이로 이미 가려져 있으므로 경고 불필요
+        -- Warn only when hovering over a dead spider (corpse)
+        -- No warning required for live spiders as they are already obscured by the overlay
         if NoSpiderDB and NoSpiderDB.enabled and NoSpiderDB.deadSpiderWarning and UnitExists("mouseover") and
             IsSpider("mouseover") and UnitIsDead("mouseover") then
             ShowWarning(UnitName("mouseover"), GetNPCID("mouseover"))
