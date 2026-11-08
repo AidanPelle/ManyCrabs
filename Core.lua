@@ -233,6 +233,17 @@ local function CreateOverlayFrame()
         nameText:SetFont(NS.FONT_KR, 9, "OUTLINE")
         frame.nameText = nameText
 
+        -- Use an independent high-strata frame so this mask draws above the
+        -- native nameplate label rather than behind it.
+        local nameCoverFrame = CreateFrame("Frame", nil, UIParent)
+        nameCoverFrame:SetFrameStrata("TOOLTIP")
+        local nameCover = nameCoverFrame:CreateTexture(nil, "OVERLAY")
+        nameCover:SetAllPoints(nameCoverFrame)
+        nameCoverFrame:Hide()
+        frame.nameCoverFrame = nameCoverFrame
+        nameCover:Hide()
+        frame.nameCover = nameCover
+
         -- street text
         local distText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         distText:SetPoint("CENTER", frame, "CENTER", 0, -34)
@@ -249,6 +260,9 @@ local function ApplyOverlayStyle(frame)
 
     frame.bg:SetColorTexture(r, g, b, a)
     frame.border:SetColorTexture(r * 0.6, g * 0.6, b * 0.6, a)
+    if frame.nameCover then
+        frame.nameCover:SetColorTexture(r, g, b, 1)
+    end
 end
 
 local function ShowNameplateOverlay(nameplate, unitToken)
@@ -263,17 +277,36 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     frame:SetParent(nameplate)
     frame:SetSize(db.overlayWidth, db.overlayHeight)
     frame:ClearAllPoints()
+    
     -- Attached just below the nameplate
     frame:SetPoint("TOP", nameplate, "BOTTOM", 0, 0)
     frame:SetFrameLevel(nameplate:GetFrameLevel() + 20)
 
     ApplyOverlayStyle(frame)
 
-    -- Display NPC name
-    local name = UnitName(unitToken)
-    if name then
-        frame.nameText:SetText(NS.C.LIGHTGRAY .. name .. NS.C.R)
+    -- Replace name w/ shell crab etc for display
+    local displayName = UnitName(unitToken) or "Crab"
+    displayName = displayName:gsub("Web", "Shell"):gsub("web", "shell")
+    displayName = displayName:gsub("Spider", "Crab"):gsub("spider", "crab")
+    frame.nameText:SetText(NS.C.LIGHTGRAY .. displayName .. NS.C.R)
+
+    -- Cover the original Blizzard name while retaining the transformed name
+    -- on the NoSpider overlay. UnitFrame.name is the standard name region.
+    local unitFrame = nameplate.UnitFrame
+    local originalName = unitFrame and unitFrame.name
+    local nameCoverFrame = frame.nameCoverFrame
+    nameCoverFrame:SetParent(UIParent)
+    nameCoverFrame:SetFrameStrata("TOOLTIP")
+    nameCoverFrame:SetFrameLevel(nameplate:GetFrameLevel() + 100)
+    nameCoverFrame:ClearAllPoints()
+    nameCoverFrame:SetSize(200, 10)
+    if originalName then
+        nameCoverFrame:SetPoint("CENTER", originalName, "CENTER")
+    else
+        nameCoverFrame:SetPoint("TOP", nameplate, "TOP", 0, 8)
     end
+    frame.nameCover:Show()
+    nameCoverFrame:Show()
 
     -- Distance Display OnUpdate Settings
     frame.unitToken = unitToken
@@ -304,6 +337,8 @@ local function HideNameplateOverlay(nameplate)
         frame:SetScript("OnUpdate", nil)
         frame.unitToken = nil
         frame.distText:SetText("")
+        frame.nameCover:Hide()
+        frame.nameCoverFrame:Hide()
         frame:Hide()
         frame:ClearAllPoints()
         frame:SetParent(UIParent)
@@ -702,6 +737,8 @@ end
 local function ClearAllOverlays()
     for nameplate, frame in pairs(activePlates) do
         frame:Hide()
+        frame.nameCover:Hide()
+        frame.nameCoverFrame:Hide()
         frame:ClearAllPoints()
         frame:SetParent(UIParent)
         table.insert(overlayPool, frame)
