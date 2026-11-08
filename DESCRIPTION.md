@@ -1,5 +1,8 @@
 # NoSpider - Arachnophobia Mode
 
+This is a copy of NoSpider by GrasHopper42. I'm only working on this because my friend has arachnophobia, and we want to play WoW Forever together.
+Original mod: https://www.curseforge.com/wow/addons/nospider-arachnophobia-mode
+
 An addon for players who are afraid of spiders, silithids, and other bug-type monsters. It places an overlay on nameplates to hide their 3D models.
 
 ⚠️ **Important Notice** This addon uses a **nameplate overlay** method, not a model swap. Spider models may still be visible when nameplates are not shown (long distance, corpses, cutscenes, right after loading, etc.). Please be cautious if you have severe arachnophobia.
