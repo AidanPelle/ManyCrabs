@@ -542,7 +542,7 @@ do
         -- 아이콘
         local icon = pin:CreateTexture(nil, "ARTWORK")
         icon:SetAllPoints()
-        icon:SetTexture("Interface\\AddOns\\NoSpider\\textures\\spidercover")
+        icon:SetTexture("Interface\\AddOns\\ManyCrabs\\textures\\spidercover")
 
         pin:SetScript("OnEnter", function(self)
             icon:SetAlpha(1.0)

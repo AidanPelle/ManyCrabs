@@ -11,7 +11,7 @@
                 </Texture>
             </Layer>
             <Layer level="ARTWORK">
-                <Texture parentKey="Icon" file="Interface\AddOns\NoSpider\textures\spidercover">
+                <Texture parentKey="Icon" file="Interface\Addons\ManyCrabs\textures\spidercover">
                     <Size x="20" y="20"/>
                     <Anchors>
                         <Anchor point="TOPLEFT" x="6" y="-5"/>

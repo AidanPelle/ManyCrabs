@@ -217,14 +217,14 @@ local function CreateOverlayFrame()
         local icon = frame:CreateTexture(nil, "OVERLAY")
         icon:SetSize(100, 100)
         icon:SetPoint("CENTER", frame, "CENTER", 0, 16)
-        icon:SetTexture("Interface\\AddOns\\NoSpider\\textures\\spidercover")
+        icon:SetTexture("Interface\\AddOns\\ManyCrabs\\textures\\spidercover")
         frame.icon = icon
 
         -- safe text
         local text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         text:SetPoint("CENTER", frame, "CENTER", 0, -14)
         text:SetFont(NS.FONT_KR, 12, "OUTLINE")
-        text:SetText(NS.C.LIGHTGREEN .. "안전" .. NS.C.R)
+        text:SetText(NS.C.LIGHTGREEN .. "Safety" .. NS.C.R)
         frame.text = text
 
         -- NPC name (top of overlay)
@@ -338,7 +338,7 @@ local function CreatePortraitOverlay(portraitTexture, name)
     local icon = frame:CreateTexture(nil, "OVERLAY")
     icon:SetSize(24, 24)
     icon:SetPoint("CENTER", frame, "CENTER")
-    icon:SetTexture("Interface\\AddOns\\NoSpider\\textures\\spidercover")
+    icon:SetTexture("Interface\\AddOns\\ManyCrabs\\textures\\spidercover")
     frame.icon = icon
 
     frame:Hide()
