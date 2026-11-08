@@ -1,0 +1,27 @@
+## Interface: 120105, 50504, 40402, 30404, 20506, 16001, 11509
+## Title: NoSpider - Arachnophobia Mode
+## Notes: Hides spider models behind overlays for arachnophobia sufferers
+## Notes-koKR: 거미 공포증 모드 - 거미 몬스터를 오버레이로 가립니다
+## Author: 베짱이42
+## Version: 1.4.0
+## SavedVariables: NoSpiderDB
+## DefaultState: enabled
+## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, Krowi_WorldMapButtons
+## X-Curse-Project-ID: 1485269
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\Krowi_WorldMapButtons\Krowi_WorldMapButtons-1.4.lua
+
+Util.lua
+SpiderNPCs.lua
+SpiderSubZones.lua
+SpiderZones.lua
+SpiderSpawnData.lua
+MapButton.xml
+MapOverlay.lua
+Core.lua
+SlashCommands.lua
+OptionsPanel.lua

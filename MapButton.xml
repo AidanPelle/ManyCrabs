@@ -1,0 +1,41 @@
+<Ui>
+    <Button name="NoSpiderMapButtonTemplate" frameStrata="HIGH" motionScriptsWhileDisabled="true" virtual="true">
+        <Size x="32" y="32"/>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background" file="Interface\Minimap\UI-Minimap-Background">
+                    <Size x="25" y="25"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="2" y="-4"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <Texture parentKey="Icon" file="Interface\AddOns\NoSpider\textures\spidercover">
+                    <Size x="20" y="20"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="6" y="-5"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="OVERLAY">
+                <Texture parentKey="IconOverlay" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Icon"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Icon"/>
+                    </Anchors>
+                    <Color r="0.0" g="0.0" b="0.0" a="0.5"/>
+                </Texture>
+            </Layer>
+            <Layer level="OVERLAY" textureSubLevel="1">
+                <Texture parentKey="Border" file="Interface\Minimap\MiniMap-TrackingBorder">
+                    <Size x="54" y="54"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+        </Layers>
+        <HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
+    </Button>
+</Ui>
