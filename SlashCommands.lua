@@ -346,7 +346,12 @@ local function HandleSlashCommand(msg)
 
     elseif cmd == "debug" then
         NS.PrintDebugInfo()
+    elseif cmd == "errors" or cmd == "errorlog" then
+        NS.PrintErrorLog()
 
+    elseif cmd == "clearerrors" then
+        NS.ClearErrorLog()
+        print(p .. " Error log cleared.")
     elseif cmd == "config" or cmd == "options" or cmd == "설정" then
         if NS.OpenOptionsPanel then
             NS.OpenOptionsPanel()

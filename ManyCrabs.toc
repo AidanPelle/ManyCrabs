@@ -1,10 +1,10 @@
 ## Interface: 120105, 50504, 40402, 30404, 20506, 16001, 11509
-## Title: NoSpider - Arachnophobia Mode
+## Title: ManyCrabs - Aidan :D
 ## Notes: Hides spider models behind overlays for arachnophobia sufferers
 ## Notes-koKR: 거미 공포증 모드 - 거미 몬스터를 오버레이로 가립니다
 ## Author: 베짱이42
 ## Version: 1.4.0
-## SavedVariables: NoSpiderDB
+## SavedVariables: NoSpiderDB, NoSpiderErrorLog
 ## DefaultState: enabled
 ## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, Krowi_WorldMapButtons
 ## X-Curse-Project-ID: 1485269
