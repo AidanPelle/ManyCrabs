@@ -299,7 +299,7 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     nameCoverFrame:SetFrameStrata("TOOLTIP")
     nameCoverFrame:SetFrameLevel(nameplate:GetFrameLevel() + 100)
     nameCoverFrame:ClearAllPoints()
-    nameCoverFrame:SetSize(200, 10)
+    nameCoverFrame:SetSize(200, 12)
     if originalName then
         nameCoverFrame:SetPoint("CENTER", originalName, "CENTER")
     else
@@ -353,6 +353,9 @@ end
 local portraitOverlays = {}
 
 local function CreatePortraitOverlay(portraitTexture, name)
+    local db = NoSpiderDB
+    local r, g, b = unpack(db.overlayColor)
+    
     -- portraitTexture is a Texture object, so it is not a Frame.
     -- Take the parent Frame and create an overlay Frame there,
     -- The position is tailored to portraitTexture.
@@ -391,9 +394,17 @@ local function CreatePortraitOverlay(portraitTexture, name)
     nameCoverFrame:SetParent(UIParent)
     nameCoverFrame:SetFrameStrata("TOOLTIP")
     nameCoverFrame:SetFrameLevel((frame:GetFrameLevel() or 0) + 10)
-    nameCoverFrame:SetSize(200, 10)
+    nameCoverFrame:SetSize(120, 16)
 
-    nameCoverFrame:SetPoint("TOP", UIParent, "TOP", 0, 100)
+    nameCoverFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -125, -8)
+
+    local s, err = pcall(function()
+        nameCover:SetColorTexture(r, g, b)
+    end)
+
+    if (err) then
+        print(err)
+    end
 
     return frame
 end
@@ -419,7 +430,7 @@ local function UpdatePortraitOverlay(unitToken, portraitFrame, overlayKey)
 
     local overlay = portraitOverlays[overlayKey]
     local r, g, b = unpack(NoSpiderDB.overlayColor)
-    overlay.bg:SetColorTexture(r, g, b, NoSpiderDB.overlayAlpha)
+    overlay.bg:SetColorTexture(r, g, b)
 
     if UnitExists(unitToken) and IsSpider(unitToken) then
         overlay:Show()
