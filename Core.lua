@@ -279,7 +279,7 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     frame:ClearAllPoints()
     
     -- Attached just below the nameplate
-    frame:SetPoint("TOP", nameplate, "BOTTOM", 0, 0)
+    frame:SetPoint("TOP", nameplate, "BOTTOM", 0, 5)
     frame:SetFrameLevel(nameplate:GetFrameLevel() + 20)
 
     ApplyOverlayStyle(frame)
@@ -619,10 +619,10 @@ local function CheckZone()
             currentWarningLevel = WARNING_PROXIMITY
             currentZoneName = (mapID and C_Map.GetMapInfo(mapID) and C_Map.GetMapInfo(mapID).name) or ""
             zwBg:SetColorTexture(unpack(NoSpiderDB.warnProximityBgColor))
-            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTYELLOW ..
-                               "[Warning] Approaching spider infestation coordinates" .. NS.C.R)
+            zwText:SetText(NS.C.ORANGE .. "[ManyCrabs]" .. NS.C.R .. " " .. NS.C.LIGHTYELLOW ..
+                               "[Warning] Approaching crab infestation coordinates" .. NS.C.R)
             zoneWarningFrame:Show()
-            ShowWarning("Accessing spider haunt coordinates")
+            ShowWarning("Accessing crab haunt coordinates")
         end
     elseif isSpiderZ and NoSpiderDB.zoneWarning then
         local zoneName = (mapID and C_Map.GetMapInfo(mapID) and C_Map.GetMapInfo(mapID).name) or ""
@@ -630,8 +630,8 @@ local function CheckZone()
             currentWarningLevel = WARNING_ZONE
             currentZoneName = zoneName
             zwBg:SetColorTexture(unpack(NoSpiderDB.warnZoneBgColor))
-            zwText:SetText(NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " " .. NS.C.LIGHTORANGE ..
-                               "[Caution] Spider-infested area" .. NS.C.R .. " - " .. zoneName)
+            zwText:SetText(NS.C.ORANGE .. "[ManyCrabs]" .. NS.C.R .. " " .. NS.C.LIGHTORANGE ..
+                               "[Caution] Crab-infested area" .. NS.C.R .. " - " .. zoneName)
             zoneWarningFrame:Show()
             if NoSpiderDB.zoneWarningSound then
                 ShowWarning(zoneName)
