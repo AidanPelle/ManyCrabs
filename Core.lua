@@ -352,7 +352,7 @@ end
 -- ============================================
 local portraitOverlays = {}
 
-local function CreatePortraitOverlay(portraitTexture, name)
+local function CreatePortraitOverlay(portraitTexture, name, unitToken)
     local db = NoSpiderDB
     local r, g, b = unpack(db.overlayColor)
     
@@ -397,14 +397,19 @@ local function CreatePortraitOverlay(portraitTexture, name)
     nameCoverFrame:SetSize(120, 16)
 
     nameCoverFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -125, -8)
+    nameCover:SetColorTexture(r, g, b)
 
-    local s, err = pcall(function()
-        nameCover:SetColorTexture(r, g, b)
-    end)
 
-    if (err) then
-        print(err)
-    end
+
+    local nameText = nameCoverFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    nameText:SetPoint("CENTER", nameCoverFrame)
+    nameText:SetFont(NS.FONT_KR, 9, "OUTLINE")
+    nameCoverFrame.nameText = nameText
+    
+    local displayName = UnitName(unitToken) or "Crab"
+    displayName = displayName:gsub("Web", "Shell"):gsub("web", "shell")
+    displayName = displayName:gsub("Spider", "Crab"):gsub("spider", "crab")
+    nameCoverFrame.nameText:SetText(NS.C.LIGHTGRAY .. displayName .. NS.C.R)
 
     return frame
 end
@@ -422,7 +427,7 @@ local function UpdatePortraitOverlay(unitToken, portraitFrame, overlayKey)
     end
 
     if not portraitOverlays[overlayKey] then
-        portraitOverlays[overlayKey] = CreatePortraitOverlay(portraitFrame, overlayKey)
+        portraitOverlays[overlayKey] = CreatePortraitOverlay(portraitFrame, overlayKey, unitToken)
         if not portraitOverlays[overlayKey] then
             return
         end

@@ -353,8 +353,13 @@ local function HandleSlashCommand(msg)
         NS.ClearErrorLog()
         print(p .. " Error log cleared.")
     elseif cmd == "config" or cmd == "options" or cmd == "설정" then
-        if NS.OpenOptionsPanel then
-            NS.OpenOptionsPanel()
+        if NS.OpenSettingsPanel then
+            local s, err = pcall(function()
+                NS.OpenSettingsPanel()    
+            end)
+            if err then
+                print(err)
+            end
         end
 
     elseif cmd == "help" then
