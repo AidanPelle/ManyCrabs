@@ -9,7 +9,7 @@ local _, NS = ...
 -- ============================================
 NS.C = {
     -- 채팅 메시지 접두사
-    PREFIX     = "|cFF00FF00[NoSpider]|r ",
+    PREFIX     = "|cFF00FF00[ManyCrabs]|r ",
     -- 텍스트 색상 코드 (인라인용)
     GREEN      = "|cFF00FF00",
     RED        = "|cFFFF0000",
@@ -66,7 +66,7 @@ function NS.MakeMovable(frame, dbKey, defaults, tooltipTitle)
     end)
     frame:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
-        GameTooltip:AddLine("[NoSpider] " .. (tooltipTitle or ""), 1, 1, 1)
+        GameTooltip:AddLine("[ManyCrabs] " .. (tooltipTitle or ""), 1, 1, 1)
         GameTooltip:AddLine("드래그: 이동 | 우클릭: 설정", 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)

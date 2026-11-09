@@ -92,7 +92,7 @@ local options = {
                     name = "전체 설정 초기화",
                     order = 92,
                     confirm = true,
-                    confirmText = "[NoSpider] 모든 설정을 초기화하시겠습니까?",
+                    confirmText = "[ManyCrabs] 모든 설정을 초기화하시겠습니까?",
                     func = function()
                         NS.ResetDB()
                         NS.ClearAllOverlays()

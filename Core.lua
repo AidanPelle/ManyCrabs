@@ -299,7 +299,7 @@ local function ShowNameplateOverlay(nameplate, unitToken)
     nameCoverFrame:SetFrameStrata("TOOLTIP")
     nameCoverFrame:SetFrameLevel(nameplate:GetFrameLevel() + 100)
     nameCoverFrame:ClearAllPoints()
-    nameCoverFrame:SetSize(200, 12)
+    nameCoverFrame:SetSize(150, 12)
     if originalName then
         nameCoverFrame:SetPoint("CENTER", originalName, "CENTER")
     else
@@ -474,7 +474,7 @@ local function ShowWarning(unitName, npcID)
 
     if NoSpiderDB.warningMessage then
         RaidNotice_AddMessage(RaidWarningFrame,
-            NS.C.ORANGE .. "[NoSpider]" .. NS.C.R .. " Spider detection: " .. (unitName or "?"),
+            NS.C.ORANGE .. "[ManyCrabs]" .. NS.C.R .. " Spider detection: " .. (unitName or "?"),
             ChatTypeInfo["RAID_WARNING"])
     end
 
@@ -916,7 +916,7 @@ end
 local debugMode = false
 
 local function PrintDebugInfo()
-    local p = NS.C.GREEN .. "[NoSpider Debug]" .. NS.C.R .. " "
+    local p = NS.C.GREEN .. "[ManyCrabs Debug]" .. NS.C.R .. " "
     print(p .. "=== 상태 진단 ===")
     print(p .. "애드온 활성: " .. tostring(NoSpiderDB and NoSpiderDB.enabled))
 
@@ -1113,7 +1113,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         local addonName = ...
         if addonName == ADDON_NAME then
             InitDB()
-            print(NS.C.PREFIX .. "Loading Arachnophobia Mod v1.0! /ns help")
+            print(NS.C.PREFIX .. "Loading ManyCrabs Mod v1.1! /ns help")
             print(NS.C.PREFIX .. "Enemy nameplate must be turned on for auto-detection. (" ..
                       NS.C.YELLOW .. "V key" .. NS.C.R .. ")")
             print(NS.C.PREFIX .. NS.C.GOLD ..
