@@ -473,8 +473,10 @@ local function ShowWarning(unitName, npcID)
     end
 
     if NoSpiderDB.warningMessage then
+        local displayName = unitName:gsub("Web", "Shell"):gsub("web", "shell")
+        displayName = displayName:gsub("Spider", "Crab"):gsub("spider", "crab")
         RaidNotice_AddMessage(RaidWarningFrame,
-            NS.C.ORANGE .. "[ManyCrabs]" .. NS.C.R .. " Spider detection: " .. (unitName or "?"),
+            NS.C.ORANGE .. "[ManyCrabs]" .. NS.C.R .. " Crab detection: " .. (displayName or "?"),
             ChatTypeInfo["RAID_WARNING"])
     end
 
