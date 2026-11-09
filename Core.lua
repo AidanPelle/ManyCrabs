@@ -377,6 +377,24 @@ local function CreatePortraitOverlay(portraitTexture, name)
     frame.icon = icon
 
     frame:Hide()
+
+
+    local nameCoverFrame = CreateFrame("Frame", "NoSpider2_" .. name, frame)
+    nameCoverFrame:SetFrameStrata("TOOLTIP")
+    local nameCover = nameCoverFrame:CreateTexture(nil, "OVERLAY")
+    nameCover:SetAllPoints(nameCoverFrame)
+    nameCoverFrame:Hide()
+    frame.nameCoverFrame = nameCoverFrame
+    nameCover:Hide()
+    frame.nameCover = nameCover
+
+    nameCoverFrame:SetParent(UIParent)
+    nameCoverFrame:SetFrameStrata("TOOLTIP")
+    nameCoverFrame:SetFrameLevel((frame:GetFrameLevel() or 0) + 10)
+    nameCoverFrame:SetSize(200, 10)
+
+    nameCoverFrame:SetPoint("TOP", UIParent, "TOP", 0, 100)
+
     return frame
 end
 
@@ -405,8 +423,12 @@ local function UpdatePortraitOverlay(unitToken, portraitFrame, overlayKey)
 
     if UnitExists(unitToken) and IsSpider(unitToken) then
         overlay:Show()
+        overlay.nameCover:Show()
+        overlay.nameCoverFrame:Show()
     else
         overlay:Hide()
+        overlay.nameCover:Hide()
+        overlay.nameCoverFrame:Hide()
     end
 end
 
